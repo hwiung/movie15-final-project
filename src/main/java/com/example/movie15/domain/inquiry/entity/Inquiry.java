@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -39,6 +40,7 @@ public class Inquiry extends BaseEntity {
     private User user;
 
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<InquiryFile> inquiryFiles = new ArrayList<>();
 
     public Inquiry(String subject, String content, User user) {
