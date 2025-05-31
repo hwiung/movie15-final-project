@@ -63,11 +63,12 @@ dependencies {
 	//AWS S3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
-	//flyway
-	implementation 'org.flywaydb:flyway-core:9.22.0'
-	implementation 'org.flywaydb:flyway-mysql:9.22.0'
+// flyway
+//implementation 'org.flywaydb:flyway-core:9.22.0'
+//implementation 'org.flywaydb:flyway-mysql:9.22.0'
 
-	implementation 'org.redisson:redisson:3.27.1'
+implementation 'org.redisson:redisson:3.27.1'
+
 }
 
 tasks.named('test') {

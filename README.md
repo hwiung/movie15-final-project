@@ -9,12 +9,9 @@
 - **알림 기능 제공**: 예매 및 결제 완료 시 이메일 및 푸시 알림을 통해 정보를 제공합니다.
 
 ## Movie15 팀원
-|팀원|태그|담당기능| Github 주소|
-|----|----|----|--------|
-|장대산|리더|영화 및 상영관 관리 | https://github.com/daesan12|
-|류병길|부리더|영화 예매, 결제 | https://github.com/fbqudrlf09|
-|김휘웅|팀원|회원가입 로그인 및 문의 | https://github.com/hwiung|
-|김명호|팀원|알림 및 문의 |https://github.com/KimMyungHo919|
+|팀원|태그| 담당기능               | Github 주소|
+|-|--|--------------------|--------|
+|김휘웅|팀원| 회원가입 및 로그인, 문의, 알림 | https://github.com/hwiung|
 
 ## 기술 스택
 #### Back-end
