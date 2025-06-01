@@ -10,6 +10,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     @EntityGraph(attributePaths = {"inquiryFiles", "inquiryFiles.file"})
     Page<Inquiry> findAllByUserId(Long userId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"inquryFiles", "inquiryFiles.file"})
+    @EntityGraph(attributePaths = {"inquiryFiles", "inquiryFiles.file"})
     Page<Inquiry> findAll(Pageable pageable);
 }

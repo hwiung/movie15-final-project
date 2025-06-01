@@ -78,10 +78,10 @@ public class InquiryController {
     // 문의 사항 수정
     @PatchMapping("/{id}")
     public ResponseEntity<InquiryResponseDto> updateInquiry(
-        @PathVariable Long id,
-        @RequestPart(name = "inquiry") String inquiryJson,
-        @RequestPart(name = "files", required = false) List<MultipartFile> files,
-        @AuthenticationPrincipal UserDetailsImpl userDetails)  throws IOException{
+            @PathVariable Long id,
+            @RequestPart(name = "inquiry") String inquiryJson,
+            @RequestPart(name = "files", required = false) List<MultipartFile> files,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         InquiryRequestDto dto = objectMapper.readValue(inquiryJson, InquiryRequestDto.class);
@@ -117,5 +117,18 @@ public class InquiryController {
 
         inquiryService.updateInquiryStatus(id, requestDto.getStatus());
         return ResponseEntity.ok("문의 사항의 상태가 변경됐습니다.");
+    }
+
+    //검색 조건으로 문의 조회(관리자)
+    @GetMapping("/admin/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<InquiryResponseDto>> searchInquiries(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) InquiryStatus status,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 15, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<InquiryResponseDto> result = inquiryService.searchInquiries(userId, status, keyword, pageable);
+        return ResponseEntity.ok(result);
     }
 }

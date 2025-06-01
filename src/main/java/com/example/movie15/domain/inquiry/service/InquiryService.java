@@ -6,6 +6,7 @@ import com.example.movie15.domain.inquiry.entity.Inquiry;
 import com.example.movie15.domain.inquiry.entity.InquiryFile;
 import com.example.movie15.domain.inquiry.enums.InquiryStatus;
 import com.example.movie15.domain.inquiry.repository.InquiryFileRepository;
+import com.example.movie15.domain.inquiry.repository.InquiryQueryRepository;
 import com.example.movie15.domain.inquiry.repository.InquiryRepository;
 import com.example.movie15.domain.user.entity.User;
 import com.example.movie15.domain.user.repository.UserRepository;
@@ -51,7 +52,7 @@ public class InquiryService {
     public void createInquiry(InquiryRequestDto dto, List<MultipartFile> files, Long userId) throws IOException {
 
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException(ExceptionType.USER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ExceptionType.USER_NOT_FOUND));
 
         Inquiry inquiry = new Inquiry(dto.getSubject(), dto.getContent(), user);
         inquiryRepository.save(inquiry);
@@ -236,5 +237,17 @@ public class InquiryService {
                 inquiry.getCreatedAt(),
                 inquiry.getModifiedAt()
         );
+    }
+
+    //동적 쿼리 메소드
+    private final InquiryQueryRepository inquiryQueryRepository;
+
+    public Page<InquiryResponseDto> searchInquiries(
+            Long userId,
+            InquiryStatus status,
+            String keyword,
+            Pageable pageable
+    ) {
+        return inquiryQueryRepository.searchInquiries(userId, status, keyword, pageable);
     }
 }
