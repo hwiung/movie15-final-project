@@ -1,148 +1,159 @@
-// package com.example.movie15.domain.user.service;
-//
-// import com.example.movie15.domain.email.service.SignupEmailSenderService;
-// import com.example.movie15.domain.user.dto.JwtAuthResponse;
-// import com.example.movie15.domain.user.dto.LoginRequestDto;
-// import com.example.movie15.domain.user.dto.UserRequestDto;
-// import com.example.movie15.domain.user.entity.User;
-// import com.example.movie15.domain.user.repository.UserRepository;
-// import com.example.movie15.global.security.JwtProvider;
-// import jakarta.servlet.http.HttpServletRequest;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-// import org.springframework.security.authentication.AuthenticationManager;
-// import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//
-// import java.util.Optional;
-//
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.ArgumentMatchers.anyString;
-// import static org.mockito.Mockito.*;
-//
-// @ExtendWith(MockitoExtension.class)
-// class UserServiceTest {
-//
-//     @Mock
-//     private UserRepository userRepository;
-//
-//     @Mock
-//     private AuthenticationManager authenticationManager;
-//
-//     @Mock
-//     private JwtProvider jwtProvider;
-//
-//     @Mock
-//     private SignupEmailSenderService emailSenderService;
-//
-//     @Mock
-//     private BCryptPasswordEncoder passwordEncoder;
-//
-//     @InjectMocks
-//     private UserService userService;
-//
-//     @Test
-//     @DisplayName("회원가입 요청이 유효하면 사용자 저장하고 이메일 인증 발송")
-//     void testSignup_WithValidRequest_ShouldSaveUserAndSendEmail() throws Exception {
-//         // Given: 회원가입 요청에 대한 DTO와 이미 존재하는 이메일을 확인
-//         UserRequestDto userRequestDto = new UserRequestDto("test@example.com", "password123");
-//         when(userRepository.existsByEmail(userRequestDto.getEmail())).thenReturn(false);
-//         when(emailSenderService.sendVerificationEmail(anyString())).thenReturn("mock-token");
-//
-//         // When: 회원가입 메서드 호출
-//         userService.signup(userRequestDto);
-//
-//         // Then: 사용자 저장 및 이메일 발송이 일어났는지 검증
-//         verify(userRepository).save(any(User.class));
-//         verify(emailSenderService).sendVerificationEmail(userRequestDto.getEmail());
-//     }
-//
-//     @Test
-//     @DisplayName("올바른 자격증명으로 로그인 시 JWT 토큰을 반환")
-//     void testLogin_WithValidCredentials_ShouldReturnJwtAuthResponse() {
-//         // Given: 유효한 로그인 요청 DTO와 mock 사용자 정보 설정
-//         LoginRequestDto loginRequestDto = new LoginRequestDto("test@example.com", "password123");
-//         User mockUser = new User("test@example.com", "encoded-password", "김명호");
-//         when(userRepository.findByEmail(loginRequestDto.getEmail())).thenReturn(Optional.of(mockUser));
-//         when(passwordEncoder.matches(loginRequestDto.getPassword(), mockUser.getPassword())).thenReturn(true);
-//
-//         Authentication authentication = mock(Authentication.class);
-//         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-//         when(jwtProvider.generateToken(authentication, mockUser.getId())).thenReturn("mock-jwt-token");
-//
-//         // When: 로그인 메서드 호출
-//         JwtAuthResponse response = userService.login(loginRequestDto);
-//
-//         // Then: JWT 토큰이 정상적으로 반환되었는지 검증
-//         assertNotNull(response);
-//         assertEquals("Bearer", response.getTokenAuthScheme());
-//         assertEquals("mock-jwt-token", response.getAccessToken());
-//     }
-//
-//     @Test
-//     @DisplayName("올바른 비밀번호 입력 시 true 반환")
-//     void testCheckPassword_WithCorrectPassword_ShouldReturnTrue() {
-//         // Given: 비밀번호 확인을 위한 mock 사용자 설정
-//         User mockUser = new User("test@example.com", "encoded-password", "김명호");
-//         when(userRepository.findByIdOrElseThrow(1L)).thenReturn(mockUser);
-//         when(passwordEncoder.matches("correct-password", mockUser.getPassword())).thenReturn(true);
-//
-//         // When: 비밀번호 확인 메서드 호출
-//         Boolean isPasswordCorrect = userService.checkPassword(1L, "correct-password");
-//
-//         // Then: true가 반환되었는지 검증
-//         assertNotNull(isPasswordCorrect);
-//     }
-//
-//     @Test
-//     @DisplayName("잘못된 비밀번호 입력 시 false 반환")
-//     void testCheckPassword_WithIncorrectPassword_ShouldReturnFalse() {
-//         // Given: 비밀번호 확인을 위한 mock 사용자 설정
-//         User mockUser = new User("test@example.com", "encoded-password", "김명호");
-//         when(userRepository.findByIdOrElseThrow(1L)).thenReturn(mockUser);
-//         when(passwordEncoder.matches("wrong-password", mockUser.getPassword())).thenReturn(false);
-//
-//         // When: 비밀번호 확인 메소드 호출
-//         Boolean isPasswordCorrect = userService.checkPassword(1L, "wrong-password");
-//
-//         // Then: false가 반환되었는지 검증
-//         assertFalse(isPasswordCorrect);
-//     }
-//
-//     @Test
-//     @DisplayName("유효한 토큰으로 로그아웃 시 토큰 무효화")
-//     void testLogout_WithValidToken_ShouldInvalidateToken() {
-//         // Given: 유효한 토큰과 인증된 사용자 설정
-//         String validToken = "valid-jwt-token";
-//         String username = "test@example.com";
-//
-//         // 인증 정보를 설정하여 SecurityContext에 인증된 사용자 정보 추가
-//         Authentication authentication = mock(Authentication.class);
-//         when(authentication.isAuthenticated()).thenReturn(true);
-//         when(authentication.getPrincipal()).thenReturn(username);
-//         SecurityContextHolder.getContext().setAuthentication(authentication);  // Context에 인증 정보 설정
-//
-//         // `validToken` 메서드가 true를 반환하도록 설정
-//         when(jwtProvider.validToken(validToken)).thenReturn(true);
-//
-//         HttpServletRequest request = mock(HttpServletRequest.class);
-//         when(request.getHeader("Authorization")).thenReturn("Bearer " + validToken);
-//
-//         // `invalidateToken` 메서드를 호출하도록 설정
-//         doNothing().when(jwtProvider).invalidateToken(validToken);
-//
-//         // When: 로그아웃 메서드 호출
-//         userService.logout(request);
-//
-//         // Then: 토큰이 무효화된 것을 검증
-//         verify(jwtProvider).invalidateToken(validToken);  // invalidateToken 호출 검증
-//         verify(authentication).getPrincipal();  // 인증된 사용자 정보 검증
-//     }
-// }
+package com.example.movie15.domain.user.service;
+
+import com.example.movie15.domain.email.service.SignupEmailSenderService;
+import com.example.movie15.domain.rabbitmq.producer.RabbitUserSignupProducer;
+import com.example.movie15.domain.user.dto.JwtAuthResponse;
+import com.example.movie15.domain.user.dto.LoginRequestDto;
+import com.example.movie15.domain.user.dto.UserRequestDto;
+import com.example.movie15.domain.user.entity.User;
+import com.example.movie15.domain.user.repository.UserRepository;
+import com.example.movie15.global.exception.BadValueException;
+import com.example.movie15.global.exception.ExceptionType;
+import com.example.movie15.global.security.JwtProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @InjectMocks
+    private UserService userService;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private SignupEmailSenderService emailSenderService;
+
+    @Mock
+    private RabbitUserSignupProducer rabbitUserSignupProducer;
+
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtProvider jwtProvider;
+
+    @Test
+    @DisplayName("중복 이메일 회원가입 예외 발생")
+    void signup_shouldThrowException_whenEmailAlreadyExists() {
+        UserRequestDto dto = new UserRequestDto("email@test.com", "password", "user");
+        User existingUser = new User();
+        given(userRepository.findByEmail(dto.getEmail())).willReturn(Optional.of(existingUser));
+
+        assertThatThrownBy(() -> userService.signup(dto))
+                .isInstanceOf(BadValueException.class)
+                .hasMessageContaining(ExceptionType.EXIST_USER.getMessage());
+    }
+
+    @Test
+    @DisplayName("정상적인 회원가입 성공")
+    void signup_shouldSucceed_whenEmailIsNew() throws Exception {
+        UserRequestDto dto = new UserRequestDto("email@test.com", "password", "user");
+        given(userRepository.findByEmail(dto.getEmail())).willReturn(Optional.empty());
+        given(emailSenderService.sendVerificationEmail(any())).willReturn("token");
+        given(passwordEncoder.encode(any())).willReturn("encodedPassword");
+
+        userService.signup(dto);
+
+        verify(userRepository).save(any(User.class));
+        verify(rabbitUserSignupProducer).userSignupEvent(anyLong(), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 존재하지 않는 이메일")
+    void login_shouldFail_whenEmailNotFound() {
+        LoginRequestDto dto = new LoginRequestDto("nonexistent@test.com", "password");
+        given(userRepository.findByEmailAndIsDeletedFalse(dto.getEmail())).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.login(dto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining(ExceptionType.WRONG_EMAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 비밀번호 불일치")
+    void login_shouldFail_whenPasswordIncorrect() {
+        LoginRequestDto dto = new LoginRequestDto("email@test.com", "wrongpassword");
+        User user = new User("email@test.com", "encoded-password", "user");
+        user.setVerified(true);
+        given(userRepository.findByEmailAndIsDeletedFalse(dto.getEmail())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(dto.getPassword(), user.getPassword())).willReturn(false);
+
+        assertThatThrownBy(() -> userService.login(dto))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining(ExceptionType.WRONG_PASSWORD.getMessage());
+    }
+
+    @Test
+    @DisplayName("로그인 성공 시 JWT 토큰 반환")
+    void login_shouldReturnJwtAuthResponse_whenCredentialsAreValid() {
+        LoginRequestDto dto = new LoginRequestDto("email@test.com", "password");
+        User user = new User("email@test.com", "encoded-password", "user");
+        user.setVerified(true);
+        given(userRepository.findByEmailAndIsDeletedFalse(dto.getEmail())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches(dto.getPassword(), user.getPassword())).willReturn(true);
+        given(jwtProvider.generateAccessToken(anyLong(), anyString())).willReturn("access-token");
+        given(jwtProvider.generateRefreshToken(anyLong(), anyString())).willReturn("refresh-token");
+
+        JwtAuthResponse response = userService.login(dto);
+
+        assertEquals("Bearer", response.getTokenAuthScheme());
+        assertEquals("access-token", response.getAccessToken());
+        assertEquals("refresh-token", response.getRefreshToken());
+    }
+
+    @Test
+    @DisplayName("비밀번호 확인 성공 시 true 반환")
+    void checkPassword_shouldReturnTrue_whenPasswordMatches() {
+        User user = new User("email@test.com", "encoded-password", "user");
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches("password", user.getPassword())).willReturn(true);
+
+        boolean result = userService.checkPassword(1L, "password");
+
+        assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("비밀번호 확인 실패 시 false 반환")
+    void checkPassword_shouldReturnFalse_whenPasswordDoesNotMatch() {
+        User user = new User("email@test.com", "encoded-password", "user");
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(passwordEncoder.matches("wrong", user.getPassword())).willReturn(false);
+
+        boolean result = userService.checkPassword(1L, "wrong");
+
+        assertFalse(result);
+    }
+
+    @Test
+    @DisplayName("로그아웃 시 토큰 블랙리스트 등록")
+    void logout_shouldBlacklistToken_whenTokenIsValid() {
+        String token = "valid-token";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        given(request.getHeader("Authorization")).willReturn("Bearer " + token);
+        given(jwtProvider.extractToken("Bearer " + token)).willReturn(token);
+        given(jwtProvider.validateToken(token)).willReturn(true);
+
+        userService.logout(request);
+
+        verify(jwtProvider).blacklistToken(token);
+    }
+}
